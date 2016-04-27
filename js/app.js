@@ -2,19 +2,20 @@
   'use strict';
   // document.addEventListener('DOMContentLoaded', function() {
   //   var URL = "1X1S6QeM3u3sFufBy2wbFhRjQe0m6mS9AdR36oK5Xj40"
-  //   Tabletop.init( { key: URL, callback: showInfo, simpleSheet: true } )
+  //
   // })
+  // function showInfo(data) {
+  //   var cols = [
+  //         { data: "Name" },
+  //         { data: "Latitude" },
+  //         { data: "Longitude" },
+  //         { data: "Number" },
+  //         { data: "Description" }
+  //       ]
+  //   $('#table').DataTable( { data: data, columns: cols, paging: false, info: false} );
+  // }
 
-  function showInfo(data) {
-    var cols = [
-          { data: "Name" },
-          { data: "Latitude" },
-          { data: "Longitude" },
-          { data: "Number" },
-          { data: "Description" }
-        ]
-    $('#table').DataTable( { data: data, columns: cols, paging: false, info: false} );
-  }
+
 
 
   // // tooltip methods
@@ -57,8 +58,9 @@
       height = width * mapRatio,
       scaleMultiplier = 18 // TODO: set this programmitically with bounding box from turf
 
-  let mapsvg = d3.select('#map_container').append('svg')
+  let mapsvg = d3.select('#map').append('svg')
       .attr('height', height)
+      .attr('width', width)
       .attr('id','map')
 
   let colorMap = d3.map(),
@@ -87,40 +89,83 @@
       .projection(projection)
 
   let g = mapsvg.append('g')
-      .attr('class', 'geoBoundaries')
-
+      .attr('class', 'counties')
+  let straw = mapsvg.append('g')
+      .attr('class','strawsites')
   mapsvg.call(zoom)
 
   tt.init('body')
 
 
   queue()
-    .defer(d3.json, 'data/watersheds-topo2.json')
+    .defer(d3.json, 'data/california-counties-topo.json')
+    // .defer(d3.csv, sitesURL)
     .await(renderFirst)
 
-  function renderFirst(error, geo) {
+  function renderFirst(error, geo, siteData) {
     if (error) throw error;
-
     console.log('renderFirst')
 
-    let defaultData = [],
-        topo = topojson.feature(geo, geo.objects['watersheds.geo']).features
-
     g.selectAll('path')
-      .data(topo)
+      .data(topojson.feature(geo, geo.objects.californiacounties).features)
     .enter().append('path')
-      .attr('class', '.watershed')
+      .attr('class', 'county')
       .attr('d', path)
       .on('click', function(d){ return dispatcher.changeGeo(d.id) })
-      // .on('mouseover', function(d) {
-      //   let me = d3.select(this)
-      //       value = colorMap.get(d.id),
-      //       thisText = d.properties.name + '<br>watershed id: ' + d.id + '<br> value: '+ prettify(value);
-      //   tt.follow(me, 'test')
-      // })
-      // .on("mouseout", tt.hide )
-      debugger;
-  };
+      .on('mouseover', function(d) {
+          let me = d3.select(this),
+              thisText = d.properties.name
+          tt.follow(me, thisText)
+        })
+      .on("mouseout", tt.hide )
+
+      let sitesURL = '1WdsOiJOfRHeyey0nTVREaeG0Ge6WuP1B0gN87inYu8c'
+
+      Tabletop.init( { key: sitesURL, callback: sitesInfo, simpleSheet: false } )
+      function sitesInfo (data) {
+        data['Report-sites'].elements.shift()
+        data['Report-sites'].elements.pop()
+        straw.selectAll('strawsite')
+            .data(data['Report-sites'].elements)
+          .enter().append('circle')
+            .attr('class','strawsite')
+            .attr('cy', function(d){return getXY(d.site)[1]})
+            .attr('cx', function(d){return getXY(d.site)[0]})
+            .attr('r',10)
+            .on('mouseover', function(d) {
+                let me = d3.select(this),
+                    thisText = d['total students'] + ' students planted ' + d['total plants'] + ' plants at ' + d.site + ' this season'
+                    // debugger;
+                tt.follow(me, thisText)
+              })
+            .on("mouseout", tt.hide )
+
+
+
+
+
+        function findSite (sitename) {
+          return data.Sites.elements.find(function(el){
+            return el.Site === sitename
+          })
+        }
+
+        function lonLatToXY (obj) {
+          return projection([+obj['Lon-assumed'], +obj['Lat-assumed']])
+        }
+
+        function getXY (site) {
+          let siteinfo = findSite(site)
+          return lonLatToXY(siteinfo)
+        }
+      }
+
+
+
+  }
+
+    // g.selectAll('circle')
+    //   .data()
 
   /* page listeners */
   // d3.select('#defaultData-year-dropdown').on('change', function(){
@@ -130,6 +175,5 @@
   /* dispatcher events */
   let dispatcher = d3.dispatch('changeGeo')
   dispatcher.on('changeGeo', function(geo){
-
   })
 }());
