@@ -1,22 +1,7 @@
 (function() {
   'use strict';
-  // document.addEventListener('DOMContentLoaded', function() {
-  //   var URL = "1X1S6QeM3u3sFufBy2wbFhRjQe0m6mS9AdR36oK5Xj40"
-  //
-  // })
-  // function showInfo(data) {
-  //   var cols = [
-  //         { data: "Name" },
-  //         { data: "Latitude" },
-  //         { data: "Longitude" },
-  //         { data: "Number" },
-  //         { data: "Description" }
-  //       ]
-  //   $('#table').DataTable( { data: data, columns: cols, paging: false, info: false} );
-  // }
 
-
-
+  let sitesURL = '1WdsOiJOfRHeyey0nTVREaeG0Ge6WuP1B0gN87inYu8c'
 
   // // tooltip methods
   let tt = {
@@ -119,9 +104,8 @@
         })
       .on("mouseout", tt.hide )
 
-      let sitesURL = '1WdsOiJOfRHeyey0nTVREaeG0Ge6WuP1B0gN87inYu8c'
-
       Tabletop.init( { key: sitesURL, callback: sitesInfo, simpleSheet: false } )
+
       function sitesInfo (data) {
         data['Report-sites'].elements.shift()
         data['Report-sites'].elements.pop()
@@ -135,11 +119,20 @@
             .on('mouseover', function(d) {
                 let me = d3.select(this),
                     thisText = d['total students'] + ' students planted ' + d['total plants'] + ' plants at ' + d.site + ' this season'
-                    // debugger;
                 tt.follow(me, thisText)
               })
             .on("mouseout", tt.hide )
 
+
+        var cols = [
+              { data: "site" },
+              { data: "total students" },
+              { data: "total volunteers" },
+              { data: "total volunteer houes" },
+              { data: "total plants" },
+              { data: "schools" }
+            ]
+        $('#table').DataTable( { data: data['Report-sites'].elements, columns: cols, paging: false} );
 
 
 
