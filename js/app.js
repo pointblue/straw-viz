@@ -5,8 +5,12 @@
 
   let countiesURL = 'https://raw.githubusercontent.com/pointblue/straw-viz/master/data/california-counties-topo.json'
 
+
   let documentIsLocal = /^file/.test(document.URL)
-  let geoURL = documentIsLocal ? countiesURL : 'data/california-counties-topo.json'
+  let geoURL = documentIsLocal ? countiesURL : 'data/watersheds-topo2.json'
+  // let geoURL = documentIsLocal ? countiesURL : 'data/california-counties-topo.json'
+  let geoObjects = 'watersheds'
+  // let geoObjects = 'californiacounties'
 
   // // tooltip methods
   let tt = {
@@ -32,12 +36,6 @@
     hide: function() {
       d3.select('#tooltip').classed('hidden', true);
     }
-  }
-
-  function zoomed() {
-    let g = d3.select('#map .geoBoundaries');
-    g.style("stroke-width", 1 / d3.event.scale + "px");
-    g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
   }
 
   let margin = {top: 0, left: 40, bottom: 40, right: 0},
@@ -86,6 +84,17 @@
 
   tt.init('body')
 
+  function zoomed() {
+    g.style("stroke-width", 1 / d3.event.scale + "px");
+    g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
+    straw.style("stroke-width", 1 / d3.event.scale + "px");
+    straw.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
+    d3.selectAll('.strawsite')
+      .attr('r',10-(d3.event.scale * 1.5) )
+  }
+
 
   queue()
     .defer(d3.json, geoURL)
@@ -97,7 +106,7 @@
     console.log('renderFirst')
 
     g.selectAll('path')
-      .data(topojson.feature(geo, geo.objects.californiacounties).features)
+      .data(topojson.feature(geo, geo.objects[geoObjects]).features)
     .enter().append('path')
       .attr('class', 'county')
       .attr('d', path)
