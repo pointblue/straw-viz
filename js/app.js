@@ -3,6 +3,11 @@
 
   let sitesURL = '1WdsOiJOfRHeyey0nTVREaeG0Ge6WuP1B0gN87inYu8c'
 
+  let countiesURL = 'https://raw.githubusercontent.com/pointblue/straw-viz/master/data/california-counties-topo.json'
+
+  let documentIsLocal = /^file/.test(document.URL)
+  let geoURL = documentIsLocal ? countiesURL : 'data/california-counties-topo.json'
+
   // // tooltip methods
   let tt = {
     init: function(element){
@@ -83,7 +88,7 @@
 
 
   queue()
-    .defer(d3.json, 'data/california-counties-topo.json')
+    .defer(d3.json, geoURL)
     // .defer(d3.csv, sitesURL)
     .await(renderFirst)
 
@@ -128,7 +133,7 @@
               { data: "site" },
               { data: "total students" },
               { data: "total volunteers" },
-              { data: "total volunteer houes" },
+              { data: "total volunteer hours" },
               { data: "total plants" },
               { data: "schools" }
             ]
