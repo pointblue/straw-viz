@@ -1,4 +1,4 @@
-(function() {
+// (function() {
   'use strict';
 
   let sitesURL = '1WdsOiJOfRHeyey0nTVREaeG0Ge6WuP1B0gN87inYu8c'
@@ -103,7 +103,7 @@
 
   function renderFirst(error, geo, siteData) {
     if (error) throw error;
-    console.log('renderFirst')
+    // console.log('renderFirst')
 
     g.selectAll('path')
       .data(topojson.feature(geo, geo.objects[geoObjects]).features)
@@ -120,9 +120,18 @@
 
       Tabletop.init( { key: sitesURL, callback: sitesInfo, simpleSheet: false } )
 
-      function sitesInfo (data) {
+      function munge (data) {
         data['Report-sites'].elements.shift()
         data['Report-sites'].elements.pop()
+        data['Report-sites'].elements = data['Report-sites'].elements.filter(function(el,i) {
+          return el.site != ''
+        })
+        return data
+      }
+
+      function sitesInfo (data) {
+        data = munge(data);
+
         straw.selectAll('strawsite')
             .data(data['Report-sites'].elements)
           .enter().append('circle')
@@ -132,7 +141,7 @@
             .attr('r',10)
             .on('mouseover', function(d) {
                 let me = d3.select(this),
-                    thisText = d['total students'] + ' students planted ' + d['total plants'] + ' plants at ' + d.site + ' this season'
+                    thisText = d['SUM of Total Students'] + ' students planted ' + d['SUM of Total Plants'] + ' plants at ' + d.site + ' this season'
                 tt.follow(me, thisText)
               })
             .on("mouseout", tt.hide )
@@ -140,15 +149,13 @@
 
         var cols = [
               { data: "site" },
-              { data: "total students" },
-              { data: "total volunteers" },
-              { data: "total volunteer hours" },
-              { data: "total plants" },
-              { data: "schools" }
+              { data: "SUM of Total Students" },
+              { data: "SUM of Total Volunteers" },
+              { data: "SUM of Total Volunteer Hours" },
+              { data: "SUM of Total Plants" },
+              { data: "COUNTUNIQUE of School" }
             ]
-        $('#table').DataTable( { data: data['Report-sites'].elements, columns: cols, paging: false} );
-
-
+        $('#table').DataTable( { data: data['Report-sites'].elements, columns: cols, searching: false,  paging: false} );
 
 
         function findSite (sitename) {
@@ -183,4 +190,4 @@
   let dispatcher = d3.dispatch('changeGeo')
   dispatcher.on('changeGeo', function(geo){
   })
-}());
+// }());

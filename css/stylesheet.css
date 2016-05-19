@@ -1,6 +1,6 @@
 /*body { background-color: black}*/
 .county {
-  fill: #bbb;
+  fill: #addd8e;
   stroke: #000;
   stroke-width: 1px;
 }
@@ -9,7 +9,7 @@
 }
 
 .strawsite {
-  fill: green;
+  fill: rgb(35, 93, 207);
   stroke: #000;
   stroke-width: 1px;
 }
